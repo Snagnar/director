@@ -1,7 +1,7 @@
 defaults:
 
   # Trainer
-  logdir: /dev/null
+  logdir: logs
   run: train_with_viz
   seed: 0
   task: dummy_discrete

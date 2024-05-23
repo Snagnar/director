@@ -189,6 +189,65 @@ class TensorBoardOutput(AsyncOutput):
       tf.summary.image(name, video, step)
 
 
+import wandb
+import collections
+
+class WandBOutput:
+    def __init__(self, logdir, config):
+        # def __init__(self, pattern, logdir, config):
+        # self._pattern = re.compile(pattern)
+        name = (
+            logdir.name
+        )
+        # if config["wandb_prefix"] is not None:
+        #     name = f"{config['wandb_prefix']}-{name}"
+        wandb.init(
+            project="director",
+            name=name,
+            # sync_tensorboard=True,,
+            # entity="word-bots",
+            config=dict(config),
+        )
+        self._wandb = wandb
+
+    def __call__(self, summaries):
+        bystep = collections.defaultdict(dict)
+        wandb = self._wandb
+        for step, name, value in summaries:
+            # if name == "train/Subactor-0/autoregression_loss_curve":
+            #     print("heeeere")
+            if len(value.shape) == 0:
+                # if len(value.shape) == 0 and self._pattern.search(name):
+                bystep[step][name] = float(value)
+            elif len(value.shape) == 1:
+                bystep[step][name] = wandb.Histogram(value)
+            elif len(value.shape) == 2:
+                try:
+                    value = np.clip(255 * value, 0, 255).astype(np.uint8)
+                    value = np.transpose(value, [2, 0, 1])
+                    bystep[step][name] = wandb.Image(value)
+                except Exception as e:
+                    print("got error:", e, "value:", value.shape, "name:", name, value)
+                    raise e
+                    # pass
+            elif len(value.shape) == 3:
+                value = np.clip(255 * value, 0, 255).astype(np.uint8)
+                value = np.transpose(value, [2, 0, 1])
+                bystep[step][name] = wandb.Image(value)
+            elif len(value.shape) == 4:
+                # Sanity check that the channeld dimension is last
+                assert value.shape[3] in [1, 3, 4], f"Invalid shape: {value.shape}"
+                value = np.transpose(value, [0, 3, 1, 2])
+                # If the video is a float, convert it to uint8
+                if np.issubdtype(value.dtype, np.floating):
+                    value = np.clip(255 * value, 0, 255).astype(np.uint8)
+                bystep[step][name] = wandb.Video(value)
+
+        for step, metrics in bystep.items():
+            self._wandb.log(metrics, step=step)
+
+
+
 class MlflowOutput:
 
   def __init__(self, run_name=None, resume_id=None, params={}, prefix=''):

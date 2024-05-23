@@ -31,7 +31,7 @@ def main(argv=None):
     config = config.update(agnt.Agent.configs[name])
   config = embodied.Flags(config).parse(other)
 
-  config = config.update(logdir=str(embodied.Path(config.logdir)))
+  config = config.update(logdir=str(embodied.Path(config.logdir) / config.task))
   args = embodied.Config(logdir=config.logdir, **config.train)
   args = args.update(expl_until=args.expl_until // config.env.repeat)
   print(config)
@@ -45,13 +45,13 @@ def main(argv=None):
     logger = embodied.Logger(step, [
         embodied.logger.TerminalOutput(config.filter),
         embodied.logger.JSONLOutput(actordir, 'metrics.jsonl'),
-        embodied.logger.TensorBoardOutput(actordir),
+        embodied.logger.WandBOutput(actordir, config),
     ], multiplier=config.env.repeat * parsed.actors)
   else:
     logger = embodied.Logger(step, [
         embodied.logger.TerminalOutput(config.filter),
         embodied.logger.JSONLOutput(logdir, 'metrics.jsonl'),
-        embodied.logger.TensorBoardOutput(logdir),
+        embodied.logger.WandBOutput(logdir, config),
     ], multiplier=config.env.repeat)
 
   chunk = config.replay_chunk

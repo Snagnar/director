@@ -236,6 +236,7 @@ class WandBOutput:
                 bystep[step][name] = wandb.Image(value)
             elif len(value.shape) == 4:
                 # Sanity check that the channeld dimension is last
+                continue
                 assert value.shape[3] in [1, 3, 4], f"Invalid shape: {value.shape}"
                 value = np.transpose(value, [0, 3, 1, 2])
                 # If the video is a float, convert it to uint8

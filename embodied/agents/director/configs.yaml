@@ -153,7 +153,7 @@ atari:
   encoder: {mlp_keys: '$^', cnn_keys: 'image'}
   decoder: {mlp_keys: '$^', cnn_keys: 'image'}
   env: {gray: True, repeat: 4}
-  train.steps: 5e7
+  train.steps: 4e5
 
 crafter:
 

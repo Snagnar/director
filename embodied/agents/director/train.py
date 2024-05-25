@@ -17,6 +17,8 @@ sys.path.append(str(directory.parent.parent.parent))
 __package__ = directory.name
 
 import embodied
+import time
+
 
 
 def main(argv=None):
@@ -31,7 +33,8 @@ def main(argv=None):
     config = config.update(agnt.Agent.configs[name])
   config = embodied.Flags(config).parse(other)
 
-  config = config.update(logdir=str(embodied.Path(config.logdir) / config.task))
+  timestr = time.strftime("%Y%m%d-%H%M%S")
+  config = config.update(logdir=str(embodied.Path(config.logdir) / f"{config.task}-{timestr}"))
   args = embodied.Config(logdir=config.logdir, **config.train)
   args = args.update(expl_until=args.expl_until // config.env.repeat)
   print(config)

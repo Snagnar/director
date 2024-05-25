@@ -152,7 +152,7 @@ atari:
   task: atari_pong
   encoder: {mlp_keys: '$^', cnn_keys: 'image'}
   decoder: {mlp_keys: '$^', cnn_keys: 'image'}
-  env: {gray: True, repeat: 4}
+  env: {gray: True, repeat: 4, amount: 1}
   train.steps: 1e5
 
 crafter:
